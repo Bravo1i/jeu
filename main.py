@@ -3,7 +3,7 @@ import pygame
 import sys
 import random
 
-speed = 7
+speed = 10
 ball_number = 5
 screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
 screen_width = screen.get_width()
