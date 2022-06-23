@@ -72,7 +72,7 @@ def ready(word):
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.QUIT:
-                f.close()
+                file_record.close()
                 pygame.quit()
                 sys.exit()
 
@@ -108,18 +108,29 @@ def draw_balls():
             ball.status = 1
         ball.rect.left += ball.speed_x
         ball.rect.top += ball.speed_y
-        if ball.rect.left < 0 or ball.rect.right > screen_width:
-            ball.speed_x = - ball.speed_x
-        if ball.rect.top < 0 or (ball.rect.bottom > screen_height-30):
-            score += 1
-            group_ball.remove(ball)
-            group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
+        if bar_mode == 1:
+            if ball.rect.left < 0 or ball.rect.right > screen_width:
+                ball.speed_x = - ball.speed_x
+            if ball.rect.top < 0 or (ball.rect.bottom > screen_height-30):
+                score += 1
+                group_ball.remove(ball)
+                group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
+        elif bar_mode == 2:
+            if ball.rect.left < 30 or ball.rect.right > screen_width:
+                ball.speed_x = - ball.speed_x
+            if ball.rect.top < 0 or ball.rect.bottom > screen_height:
+                score += 1
+                group_ball.remove(ball)
+                group_ball.add(Ball(random.randint(1,ball_type), (random.randint(30, screen_width - 100), 0)))
         # 下落小球 碰撞边界变向
         crash_result = pygame.sprite.collide_mask(player_ball, ball)
         if crash_result:
             score -= 10
             group_ball.remove(ball)
-            group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
+            if bar_mode == 2:
+                group_ball.add(Ball(random.randint(1,ball_type), (random.randint(30, screen_width - 100), 0)))
+            else:
+                group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
             # print("score:%d" % score)
             # show_score()
             # group_ball.empty()
@@ -146,7 +157,7 @@ def init():
     score = 0
     step = 0
     fileName = 'data.txt'
-    f = open(fileName,'w')
+    file_record = open(fileName,'w')
     screen.fill((156, 156, 156))
     # 填充屏幕颜色
     pygame.display.set_caption('Jeu de boule')
@@ -189,8 +200,6 @@ def flash():
     screen.blit(player_ball.image, player_ball.rect)
     for ball in group_ball:
         screen.blit(ball.image, ball.rect)
-        f.write("position(%d,%d)\n"%(ball.rect.left,ball.rect.top))
-    f.write("0,0,0,0,0\n")
     show_score()
     show_time()
     pygame.display.flip()
@@ -370,15 +379,19 @@ if __name__ == '__main__':
     # ready function
     group_ball = pygame.sprite.Group()
     # 向组内添加一个精灵
-    for i in range(ball_number):
-        group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
+    if bar_mode == 2:
+        for i in range(ball_number):
+            group_ball.add(Ball(random.randint(1,ball_type), (random.randint(30, screen_width - 100), 0)))
+    else:
+        for i in range(ball_number):
+            group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
         # 创建下落的球组
     while True:
         clock.tick(fps)
         # 游戏主循环
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                f.close()
+                file_record.close()
                 pygame.quit()
                 sys.exit()
             if event.type == get_score:
@@ -388,6 +401,7 @@ if __name__ == '__main__':
             if event.type == tick1s:
                 time += 1
                 if time >= duree:
+                    file_record.write()
                     time = 0
                     screen.fill((156, 156, 156))
                     show_score()
@@ -396,8 +410,19 @@ if __name__ == '__main__':
                     step = 0
                     ball_number = 5
                     ready("Time's up!!Press enter to restart or esc to quit")
-                    for i in range(ball_number):
-                        group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
+                    screen.fill((156, 156, 156))
+                    menu()
+                    choose_nb_ball()
+                    choose_bar()
+                    choose_sqr()
+                    pygame.mouse.set_visible(False)
+                    ready("Are You Ready? Press enter to begin")
+                    if bar_mode == 2:
+                        for i in range(ball_number):
+                            group_ball.add(Ball(random.randint(1,ball_type), (random.randint(30, screen_width - 100), 0)))
+                    else:
+                        for i in range(ball_number):
+                            group_ball.add(Ball(random.randint(1,ball_type), (random.randint(0, screen_width - 100), 0)))
         control_ball_bar()
         # 移动玩家小球
         flash()
