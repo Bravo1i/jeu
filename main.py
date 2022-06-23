@@ -45,6 +45,9 @@ class Ball(pygame.sprite.Sprite):
             self.speed_x = 0
             self.speed_y = speed_falling
             self.image = pygame.transform.scale(self.image, (74, 74))
+        elif type == 4:
+            self.image = pygame.image.load("Image/square.png")
+            self.image = pygame.transform.scale(self.image, (86, 86))
         # 加载图片并且缩小
         self.rect = self.image.get_rect()
         # 获取图片rect区域
@@ -326,17 +329,45 @@ def choose_bar():
                 pygame.quit()
                 sys.exit()
 
+def choose_sqr():
+    global player_ball
+    location = (screen_width / 2, screen_height * 0.8)
+    my_font = pygame.font.SysFont('arial', 80)
+    word = ["square","circle"]
+    textRect = []
+    for i in range(0,2):
+        text = my_font.render(word[i], True, (0, 0, 0))
+        textRect.append(text.get_rect())
+        textRect[i].center = (screen_width / 2, (i+1) * screen_height / 3)
+        screen.blit(text, textRect[i])
+    pygame.display.flip()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for rect in textRect:
+                    if rect.collidepoint(event.pos):
+                        if textRect.index(rect):
+                            player_ball = Ball(0, location)
+                            # 创建玩家的球
+                        else:
+                            player_ball = Ball(4, location)
+                            # 创建玩家的球
+                        screen.fill((156, 156, 156))
+                        return
+            if event.type == pygame.QUIT:
+                f.close()
+                pygame.quit()
+                sys.exit()
+
 if __name__ == '__main__':   
     init()
     menu()
     choose_nb_ball()
     choose_bar()
+    choose_sqr()
     pygame.mouse.set_visible(False)
     ready("Are You Ready? Press enter to begin")
     # ready function
-    location = (screen_width / 2, screen_height * 0.8)
-    player_ball = Ball(0, location)
-    # 创建玩家的球
     group_ball = pygame.sprite.Group()
     # 向组内添加一个精灵
     for i in range(ball_number):
