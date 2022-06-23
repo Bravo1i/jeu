@@ -2,7 +2,7 @@
 import pygame
 import sys
 import random
-from math import sin,cos,pi
+from math import sin, cos, pi
 
 # parametre
 speed_player = 10
@@ -11,6 +11,7 @@ ball_number = 5
 fps = 60
 duree = 30
 diffculty = ['easy','normal','hard']
+bar_mode = 1
 
 # config
 screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
@@ -169,7 +170,7 @@ def show_score():
 
 def show_time():
     my_font = pygame.font.SysFont('arial', 50)
-    dy = f"time:{time}"
+    dy = f"time:{duree - time}"
     text = my_font.render(dy, True, (0, 0, 0))
     # 获得显示对象的 rect区域大小
     textRect = text.get_rect()
@@ -181,7 +182,7 @@ def show_time():
 def flash():
     screen.fill((156, 156, 156))
     draw_balls()
-    draw_bar()
+    draw_bar(bar_mode)
     screen.blit(player_ball.image, player_ball.rect)
     for ball in group_ball:
         screen.blit(ball.image, ball.rect)
@@ -192,18 +193,29 @@ def flash():
     pygame.display.flip()
     # 刷新界面显示
 
-def draw_bar():
+def draw_bar(bar_mode):
     global step
     global score
-    pygame.draw.rect(screen,(192,192,192),(0,screen_height-30,screen_width,30))
-    pygame.draw.rect(screen,(0,0,255),(screen_width*0.5, screen_height-30, step, 30))
-    pygame.draw.rect(screen,(0,0,255),(screen_width*0.5-step, screen_height-30, step, 30))
-    pygame.draw.rect(screen,(0,0,0),(screen_width*0.7,screen_height-30,5,30))
-    pygame.draw.rect(screen,(0,0,0),(screen_width*0.9,screen_height-30,5,30))
-    pygame.draw.rect(screen,(0,0,0),(screen_width*0.1,screen_height-30,5,30))
-    pygame.draw.rect(screen,(0,0,0),(screen_width*0.3,screen_height-30,5,30))
-    if (step < screen_width*0.5):
-        step += 1
+    if bar_mode == 1:
+        pygame.draw.rect(screen,(192,192,192),(0,screen_height-30,screen_width,30))
+        pygame.draw.rect(screen,(0,0,255),(screen_width*0.5, screen_height-30, step, 30))
+        pygame.draw.rect(screen,(0,0,255),(screen_width*0.5-step, screen_height-30, step, 30))
+        pygame.draw.rect(screen,(0,0,0),(screen_width*0.7,screen_height-30,5,30))
+        pygame.draw.rect(screen,(0,0,0),(screen_width*0.9,screen_height-30,5,30))
+        pygame.draw.rect(screen,(0,0,0),(screen_width*0.1,screen_height-30,5,30))
+        pygame.draw.rect(screen,(0,0,0),(screen_width*0.3,screen_height-30,5,30))
+        if step < screen_width*0.5:
+            step += 1
+    if bar_mode == 2:
+        pygame.draw.rect(screen,(192,192,192),(0,0,30,screen_height))
+        pygame.draw.rect(screen,(0,0,255),(0, screen_height/2, 30, step))
+        pygame.draw.rect(screen,(0,0,255),(0, screen_height/2-step, 30, step))
+        pygame.draw.rect(screen,(0,0,0),(0,screen_height*0.7,30,5))
+        pygame.draw.rect(screen,(0,0,0),(0,screen_height*0.9,30,5))
+        pygame.draw.rect(screen,(0,0,0),(0,screen_height*0.1,30,5))
+        pygame.draw.rect(screen,(0,0,0),(0,screen_height*0.3,30,5))
+        if step < screen_width*0.5:
+            step += 1
     # bar
     # full_result = (step == screen_width*0.5)
     # if full_result:
@@ -267,6 +279,13 @@ def choose_nb_ball():
         # 设置显示对象居中
         textRect[i-5].center = ((i-4)*screen_width/6, 500)
         screen.blit(text, textRect[i-5])
+    word = "ball number"
+    text = my_font.render(word, True, (0, 0, 0))
+    # 获得显示对象的 rect区域大小
+    textRect_nb = text.get_rect()
+    # 设置显示对象居中
+    textRect_nb.center = (screen_width/2, 200)
+    screen.blit(text, textRect_nb)
     pygame.display.flip()
     while True:
         for event in pygame.event.get():
@@ -281,11 +300,37 @@ def choose_nb_ball():
                 pygame.quit()
                 sys.exit()
 
+def choose_bar():
+    global  bar_mode
+    my_font = pygame.font.SysFont('arial', 80)
+    word = ["Choose bar mode","Horizontal","Vertical"]
+    textRect = []
+    for i in range(0,3):
+        text = my_font.render(word[i], True, (0, 0, 0))
+        textRect.append(text.get_rect())
+        textRect[i].center = (screen_width / 2, (i+1) * screen_height / 4)
+        screen.blit(text, textRect[i])
+    pygame.display.flip()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for rect in textRect:
+                    if rect.collidepoint(event.pos):
+                        if textRect.index(rect) == 0:
+                            continue
+                        bar_mode = textRect.index(rect)
+                        screen.fill((156, 156, 156))
+                        return
+            if event.type == pygame.QUIT:
+                f.close()
+                pygame.quit()
+                sys.exit()
 
 if __name__ == '__main__':   
     init()
     menu()
     choose_nb_ball()
+    choose_bar()
     pygame.mouse.set_visible(False)
     ready("Are You Ready? Press enter to begin")
     # ready function
@@ -311,7 +356,7 @@ if __name__ == '__main__':
                 # add score while time pass and bar is in 0.7-0.9
             if event.type == tick1s:
                 time += 1
-                if(time >= duree):
+                if time >= duree:
                     time = 0
                     screen.fill((156, 156, 156))
                     show_score()
