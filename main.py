@@ -12,6 +12,7 @@ fps = 60
 duree = 30
 diffculty = ['easy','normal','hard']
 bar_mode = 1
+nb_expr = 1
 
 # config
 screen = pygame.display.set_mode(flags=pygame.FULLSCREEN)
@@ -69,9 +70,12 @@ def ready(word):
                 if event.key == pygame.K_RETURN:
                     return
                 if event.key == pygame.K_ESCAPE:
+                    show_record()
+                    file_record.close()
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.QUIT:
+                show_record()
                 file_record.close()
                 pygame.quit()
                 sys.exit()
@@ -149,7 +153,7 @@ def init():
     global tick1s
     global score
     global step
-    global f
+    global file_record
     pygame.init()
     # 初始化pygame
     pygame.mouse.set_visible(False)
@@ -157,7 +161,7 @@ def init():
     score = 0
     step = 0
     fileName = 'data.txt'
-    file_record = open(fileName,'w')
+    file_record = open(fileName,'a+')
     screen.fill((156, 156, 156))
     # 填充屏幕颜色
     pygame.display.set_caption('Jeu de boule')
@@ -173,7 +177,7 @@ def init():
 
 def show_score():
     my_font = pygame.font.SysFont('arial', 50)
-    dy = f"score:{score}"
+    dy = f"score:{score} expr:{nb_expr}"
     text = my_font.render(dy, True, (0, 0, 0))
     # 获得显示对象的 rect区域大小
     textRect = text.get_rect()
@@ -308,7 +312,7 @@ def choose_nb_ball():
                         screen.fill((156, 156, 156))
                         return
             if event.type == pygame.QUIT:
-                f.close()
+                file_record.close()
                 pygame.quit()
                 sys.exit()
 
@@ -334,7 +338,7 @@ def choose_bar():
                         screen.fill((156, 156, 156))
                         return
             if event.type == pygame.QUIT:
-                f.close()
+                file_record.close()
                 pygame.quit()
                 sys.exit()
 
@@ -368,6 +372,19 @@ def choose_sqr():
                 pygame.quit()
                 sys.exit()
 
+def show_record():
+    fileName = "data.txt"
+    file_record = open(fileName, 'r')
+    record = [0, 0, 0]
+    for line in file_record:
+        for i in range(0, 3):
+            if int(line.strip('\n')) > record[i]:
+                record[i] = int(line.strip('\n'))
+                break
+    print(record)
+    file_record.close()
+
+
 if __name__ == '__main__':   
     init()
     menu()
@@ -392,6 +409,7 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 file_record.close()
+                show_record()
                 pygame.quit()
                 sys.exit()
             if event.type == get_score:
@@ -401,7 +419,7 @@ if __name__ == '__main__':
             if event.type == tick1s:
                 time += 1
                 if time >= duree:
-                    file_record.write()
+                    file_record.write(str(score)+'\n')
                     time = 0
                     screen.fill((156, 156, 156))
                     show_score()
@@ -417,6 +435,7 @@ if __name__ == '__main__':
                     choose_sqr()
                     pygame.mouse.set_visible(False)
                     ready("Are You Ready? Press enter to begin")
+                    nb_expr += 1
                     if bar_mode == 2:
                         for i in range(ball_number):
                             group_ball.add(Ball(random.randint(1,ball_type), (random.randint(30, screen_width - 100), 0)))
