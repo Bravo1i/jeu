@@ -70,13 +70,13 @@ def ready(word):
                 if event.key == pygame.K_RETURN:
                     return
                 if event.key == pygame.K_ESCAPE:
-                    show_record()
                     file_record.close()
+                    show_record()
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.QUIT:
-                show_record()
                 file_record.close()
+                show_record()
                 pygame.quit()
                 sys.exit()
 
@@ -379,7 +379,8 @@ def show_record():
     for line in file_record:
         for i in range(0, 3):
             if int(line.strip('\n')) > record[i]:
-                record[i] = int(line.strip('\n'))
+                record.insert(i,int(line.strip('\n')))
+                record.pop()
                 break
     print(record)
     file_record.close()
@@ -409,7 +410,6 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 file_record.close()
-                show_record()
                 pygame.quit()
                 sys.exit()
             if event.type == get_score:
